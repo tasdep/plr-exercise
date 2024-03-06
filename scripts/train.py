@@ -9,6 +9,7 @@ from plr_exercise.models import Net
 from plr_exercise import PLR_ROOT_DIR
 import wandb
 import os
+import optuna
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
@@ -55,7 +56,10 @@ def test(model, device, test_loader, epoch):
         device (torch.device): The device to use for evaluation.
         test_loader (torch.utils.data.DataLoader): The data loader for test data.
         epoch (int): The current epoch number.
-    """
+
+    Returns:        
+        float: The average loss on the test set.
+        """
     model.eval()
     test_loss = 0
     correct = 0
@@ -76,11 +80,11 @@ def test(model, device, test_loader, epoch):
         )
     )
     wandb.log({"test_loss": test_loss, "epoch": epoch})
-
+    return test_loss
 
 def main():
     """
-    The main function for training the model.
+    The main function for training the model. This function also includes the Optuna hyperparameter optimization.
     """
     # Training settings
     parser = argparse.ArgumentParser(description="PyTorch MNIST Example")
@@ -139,17 +143,25 @@ def main():
     train_loader = torch.utils.data.DataLoader(dataset1, **train_kwargs)
     test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
 
-    model = Net().to(device)
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
-    for epoch in range(args.epochs):
-        train(args, model, device, train_loader, optimizer, epoch)
-        test(model, device, test_loader, epoch)
-        scheduler.step()
+    def objective(trial):
+        # Optuna variables
+        epochs = trial.suggest_int("epochs", 1, 3)
+        lr = trial.suggest_float("lr", 1e-6, 1e-1, log=True)
 
-    if args.save_model:
-        torch.save(model.state_dict(), "mnist_cnn.pt")
+        model = Net().to(device)
+        optimizer = optim.Adam(model.parameters(), lr=lr)
+        scheduler = StepLR(optimizer, step_size=1, gamma=args.gamma)
+
+        for epoch in range(epochs):
+            train(args, model, device, train_loader, optimizer, epoch)
+            test_loss = test(model, device, test_loader, epoch)
+            scheduler.step()
+
+        return test_loss
+
+    study = optuna.create_study(direction="minimize")
+    study.optimize(objective, n_trials=5)
 
     wandb.finish()
 
