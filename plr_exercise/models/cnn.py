@@ -4,8 +4,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class Net(nn.Module):
-    def __init__(self):
+    """
+    A convolutional neural network model for image classification.
+    """
 
+    def __init__(self):
+        """
+        Initializes the Net class.
+
+        This method sets up the layers and parameters of the neural network.
+        """
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, 3, 1)
         self.conv2 = nn.Conv2d(32, 64, 3, 1)
@@ -15,6 +23,15 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(128, 10)
 
     def forward(self, x):
+        """
+        Performs forward pass of the input through the network.
+
+        Args:
+            x: Input tensor.
+
+        Returns:
+            output: Output tensor after passing through the network.
+        """
         x = self.conv1(x)
         x = F.relu(x)
         x = self.conv2(x)

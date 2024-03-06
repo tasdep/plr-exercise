@@ -9,6 +9,18 @@ import time
 
 
 class Net(nn.Module):
+    """
+    Neural network model for image classification.
+
+    Attributes:
+        conv1 (nn.Conv2d): First convolutional layer.
+        conv2 (nn.Conv2d): Second convolutional layer.
+        dropout1 (nn.Dropout): First dropout layer.
+        dropout2 (nn.Dropout): Second dropout layer.
+        fc1 (nn.Linear): First fully connected layer.
+        fc2 (nn.Linear): Second fully connected layer.
+    """
+
     def __init__(self):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, 3, 1)
@@ -19,6 +31,15 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(128, 10)
 
     def forward(self, x):
+        """
+        Forward pass of the neural network.
+
+        Args:
+            x (torch.Tensor): Input tensor.
+
+        Returns:
+            torch.Tensor: Output tensor.
+        """
         x = self.conv1(x)
         x = F.relu(x)
         x = self.conv2(x)
@@ -35,6 +56,9 @@ class Net(nn.Module):
 
 
 def main():
+    """
+    Main function for training and testing the neural network model.
+    """
     # Training settings
     parser = argparse.ArgumentParser(description="PyTorch MNIST Example")
     parser.add_argument(

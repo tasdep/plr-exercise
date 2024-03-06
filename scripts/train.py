@@ -12,9 +12,19 @@ import os
 
 
 def train(args, model, device, train_loader, optimizer, epoch):
+    """
+    Trains the model for one epoch.
+
+    Args:
+        args (argparse.Namespace): Command-line arguments.
+        model (torch.nn.Module): The model to train.
+        device (torch.device): The device to use for training.
+        train_loader (torch.utils.data.DataLoader): The data loader for training data.
+        optimizer (torch.optim.Optimizer): The optimizer to use for training.
+        epoch (int): The current epoch number.
+    """
     model.train()
     for batch_idx, (data, target) in enumerate(train_loader):
-
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
@@ -37,13 +47,21 @@ def train(args, model, device, train_loader, optimizer, epoch):
 
 
 def test(model, device, test_loader, epoch):
+    """
+    Evaluates the model on the test set.
+
+    Args:
+        model (torch.nn.Module): The model to evaluate.
+        device (torch.device): The device to use for evaluation.
+        test_loader (torch.utils.data.DataLoader): The data loader for test data.
+        epoch (int): The current epoch number.
+    """
     model.eval()
     test_loss = 0
     correct = 0
 
     with torch.no_grad():
         for data, target in test_loader:
-
             data, target = data.to(device), target.to(device)
             output = model(data)
             test_loss += F.nll_loss(output, target, reduction="sum").item()  # sum up batch loss
@@ -61,6 +79,9 @@ def test(model, device, test_loader, epoch):
 
 
 def main():
+    """
+    The main function for training the model.
+    """
     # Training settings
     parser = argparse.ArgumentParser(description="PyTorch MNIST Example")
     parser.add_argument(
